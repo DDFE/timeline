@@ -2,6 +2,7 @@
 
 var requestAnimationFrame,
 	cancelAnimationFrame,
+	startTimeline,
 	DEFAULT_INTERVAL = 1000 / 60;
 
 function Timeline() {
@@ -13,51 +14,19 @@ Timeline.prototype.onenterframe = function (time) {
 };
 
 Timeline.prototype.start = function (interval) {
-	var startTime = +new Date(),
-		me = this,
-		lastTick = 0;
+	var me = this;
 	me.interval = interval || DEFAULT_INTERVAL;
-
-	me.startTime = startTime;
-	me.stop();
-	nextTick();
-
-	function nextTick() {
-		var now = +new Date();
-
-		me.animationHandler = requestAnimationFrame(nextTick);
-
-		if (now - lastTick >= me.interval) {
-			me.onenterframe(now - startTime);
-			lastTick = now;
-		}
-	}
+	startTimeline(me, +new Date())
 };
 
 Timeline.prototype.restart = function () {
 	// body...
-	var me = this,
-		lastTick = 0, interval, startTime;
+	var me = this;
 
 	if (!me.dur || !me.interval) return;
 
-	interval = me.interval;
-	startTime = +new Date() - me.dur;
-
-	me.startTime = startTime;
 	me.stop();
-	nextTick();
-
-	function nextTick() {
-		var now = +new Date();
-
-		me.animationHandler = requestAnimationFrame(nextTick);
-
-		if (now - lastTick >= interval) {
-			me.onenterframe(now - startTime);
-			lastTick = now;
-		}
-	}
+	startTimeline(me, +new Date() - me.dur);
 };
 
 Timeline.prototype.stop = function () {
@@ -74,7 +43,7 @@ requestAnimationFrame = (function () {
 		window.oRequestAnimationFrame ||
 			// if all else fails, use setTimeout
 		function (callback) {
-			return window.setTimeout(callback, 1000 / 60); // shoot for 60 fps
+			return window.setTimeout(callback, (callback.interval || DEFAULT_INTERVAL) / 2); // make interval as precise as possible.
 		};
 })();
 
@@ -89,5 +58,23 @@ cancelAnimationFrame = (function () {
 		};
 })();
 
+startTimeline = function(timeline, startTime) {
+	var lastTick = +new Date();
+
+	timeline.startTime = startTime;
+	nextTick.interval = timeline.interval;
+	nextTick();
+
+	function nextTick() {
+		var now = +new Date();
+
+		timeline.animationHandler = requestAnimationFrame(nextTick);
+
+		if (now - lastTick >= timeline.interval) {
+			timeline.onenterframe(now - startTime);
+			lastTick = now;
+		}
+	}
+};
 
 module.exports = Timeline;

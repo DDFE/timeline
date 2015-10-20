@@ -1,6 +1,6 @@
 {
   "name": "timeline",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "timeline.js",
   "description": "管理动画的时间轴，封装了raf"
 }
