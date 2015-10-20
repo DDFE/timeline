@@ -17,7 +17,7 @@ Timeline.prototype.start = function (interval) {
 		me = this,
 		lastTick = 0;
 	me.interval = interval || DEFAULT_INTERVAL;
-	
+
 	me.startTime = startTime;
 	me.stop();
 	nextTick();
